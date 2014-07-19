@@ -22,8 +22,23 @@ public class Preparator {
     public static void main(String[] args) throws IOException {
         System.out.print("Enter url: ");
         String url = new BufferedReader(new InputStreamReader(System.in)).readLine();
-        Problem problem = loadProblem(url);
-        prepare(new File(System.getProperty("solutionsRoot")), problem);
+        Collection<Problem> problems = loadProblems(url);
+        File solutionsRoot = new File(System.getProperty("solutionsRoot"));
+        for (Problem problem : problems) {
+            prepare(solutionsRoot, problem);
+        }
+    }
+
+    private static Collection<Problem> loadProblems(String url) throws IOException {
+        ArrayList<Problem> result = new ArrayList<Problem>();
+        if (url.matches("[\\w/:]*codeforces.ru/contest/[0-9]+")) {
+            for (char p = 'A'; p <= 'E'; p++) {
+                result.add(loadProblem(url + "/problem/" + p));
+            }
+        } else {
+            result.add(loadProblem(url));
+        }
+        return result;
     }
 
     private static Problem loadProblem(String url) throws IOException {
