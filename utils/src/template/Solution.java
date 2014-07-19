@@ -17,7 +17,7 @@ public class Solution {
 //		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
         PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream));
 
-        //TODO: put solution here
+
 
         out.flush();
     }

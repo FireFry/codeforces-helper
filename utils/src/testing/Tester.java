@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,29 +24,37 @@ public class Tester {
                 System.err.println("Test " + test + " failed");
                 verdict.print(System.err);
             }
+            if (verdict.time() > maxTime) {
+                maxTime = verdict.time();
+            }
         }
         if (test == 0) {
             System.err.println("No test found!");
         } else if (succeeded) {
-            System.out.println("Ok! (time: " + maxTime + " ms))");
+            System.out.println("Ok! (time: " + maxTime + " ms)");
         }
     }
 
     private static Verdict test(TestData testData) {
         try {
             ByteArrayOutputStream solutionOutput = new ByteArrayOutputStream();
-            Solution.solve(testData.inputSteam(), new PrintStream(solutionOutput));
-            return confirmOutput(testData.output(), solutionOutput.toString());
+            Method method = Class.forName("Solution").getMethod("solve", InputStream.class, PrintStream.class);
+
+            long strartAt = System.currentTimeMillis();
+            method.invoke(null, testData.inputSteam(), new PrintStream(solutionOutput));
+//            Solution.solve(testData.inputSteam(), new PrintStream(solutionOutput));
+            long endAt = System.currentTimeMillis();
+
+            return confirmOutput(testData.output(), solutionOutput.toString()) ?
+                    Verdict.accepted(endAt - strartAt) :
+                    Verdict.failed(testData.output(), solutionOutput.toString());
         } catch (Exception e) {
             return Verdict.failed(e);
         }
     }
 
-    private static Verdict confirmOutput(String expected, String actual) {
-        if (expected.equals(actual)) {
-            return Verdict.accepted();
-        }
-        return Verdict.failed(expected, actual);
+    private static boolean confirmOutput(String expected, String actual) {
+        return expected.equals(actual);
     }
 
     private static Iterable<? extends TestData> findTests() {
